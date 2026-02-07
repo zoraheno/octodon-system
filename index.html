@@ -179,13 +179,17 @@
             document.getElementById('btn-text').innerText = "偵察衛星アクセス中...";
             document.querySelectorAll('.status-box').forEach(el => el.classList.add('animate-pulse'));
             content.innerText = "Gemini衛星よりデータ受信中... \n全セクターの戦況を分析しています...";
+
+            // 🕒 ここで「現在の年月」を自動生成するデグ！
+            const now = new Date();
+            const currentMonth = `${now.getFullYear()}年${now.getMonth() + 1}月`; // 例: "2026年3月"
             
             // 提督のポートフォリオ検索クエリ
             const query = `
-                最新ニュースと株価動向を検索:
-                1. 米国株 NASDAQ100 (QQQM) 2026年2月
+                最新ニュースと株価動向を検索 (${currentMonth}時点):
+                1. 米国株 NASDAQ100 (QQQM) ${currentMonth} 見通し
                 2. 商品先物 金 銀 銅 価格 (Gold Silver Copper)
-                3. 注目銘柄 IONQ, J-TEC(3446), EDP(7794)
+                3. 注目銘柄: 旭ダイヤモンド工業(6140), 三井金属(5706), 大阪チタニウム(5726), LITE,COHR,MU,SNDK, J-TEC(3446), EDP(7794),日本電気硝子(5214)
             `;
 
             // AIへの指示（重要：フォーマット指定）
@@ -199,7 +203,8 @@
                 その後の行で、各セクターの戦況を「軍事報告風」に簡潔に要約してください。
                 - NAS: ナスダック100
                 - METAL: 金・銀・銅
-                - ROMAN: IONQ, J-TEC, EDP (通称:ロマン砲)
+                - ROMAN: 旭ダイヤモンド工業(6140), 三井金属(5706), 大阪チタニウム(5726), LITE,COHR,MU,SNDK, J-TEC(3446), EDP(7794),日本電気硝子(5214) (通称:ロマン砲)
+                **重要発表や今後の株価に反映されうる関連ニュースがある場合、特記事項として銘柄（あれば証券コード）毎に詳細な報告を追記してください
             `;
 
             try {
