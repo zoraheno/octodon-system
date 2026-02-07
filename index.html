@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Octodon System v12</title>
+    <title>Octodon System v13</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&family=Orbitron:wght@900&display=swap');
@@ -18,9 +18,9 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: 16px;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
+            padding: 20px; /* 余白を少し広げたデグ */
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
         }
 
         .cyber-font { font-family: 'Orbitron', sans-serif; }
@@ -39,50 +39,41 @@
         .btn-push:active { transform: scale(0.96); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* 詳細エリアのアニメーション */
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         details[open] summary ~ * { animation: sweep .3s ease-in-out; }
         @keyframes sweep { 0% {opacity: 0; transform: translateY(-10px)} 100% {opacity: 1; transform: translateY(0)} }
     </style>
 </head>
-<body class="space-y-4">
-
-    <header class="flex justify-between items-end pb-2 border-b border-slate-800">
+<body class="space-y-5"> <header class="flex justify-between items-end pb-3 border-b border-slate-800">
         <div>
             <div class="flex items-center gap-2">
-                <span class="text-xs text-slate-500 font-bold tracking-widest">OCTODON v12.0</span>
-                <span id="model-badge" class="text-[9px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">OFFLINE</span>
+                <span class="text-xs text-slate-500 font-bold tracking-widest">OCTODON v13.0</span>
+                <span id="model-badge" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">OFFLINE</span>
             </div>
-            <h1 class="text-2xl cyber-font text-white leading-none mt-1">TRINITY MONITOR</h1>
-        </div>
-        <div id="clock" class="text-xs font-bold text-slate-500 cyber-font">00:00</div>
-    </header>
+            <h1 class="text-3xl cyber-font text-white leading-none mt-1">TRINITY</h1> </div>
+        <div id="clock" class="text-sm font-bold text-slate-500 cyber-font">00:00</div> </header>
 
-    <div class="grid grid-cols-3 gap-3 h-32">
+    <div class="grid grid-cols-3 gap-3 min-h-[9rem]">
         <div id="card-nas" class="status-box bg-slate-900 border border-slate-700 rounded-2xl p-2 flex flex-col items-center justify-center text-center relative overflow-hidden">
-            <div class="absolute top-2 text-[8px] text-slate-500 font-bold tracking-widest">NASDAQ</div>
-            <div id="icon-nas" class="text-3xl mb-1">🦅</div>
-            <div id="status-nas" class="text-[10px] font-bold text-slate-600 bg-slate-950 px-2 py-0.5 rounded-full">NO DATA</div>
-        </div>
+            <div class="absolute top-2 text-[10px] text-slate-500 font-bold tracking-widest">NASDAQ</div> <div id="icon-nas" class="text-3xl mb-1">🦅</div>
+            <div id="status-nas" class="text-xs font-bold text-slate-600 bg-slate-950 px-3 py-1 rounded-full">NO DATA</div> </div>
 
         <div id="card-metal" class="status-box bg-slate-900 border border-slate-700 rounded-2xl p-2 flex flex-col items-center justify-center text-center relative overflow-hidden">
-            <div class="absolute top-2 text-[8px] text-slate-500 font-bold tracking-widest">METALS</div>
+            <div class="absolute top-2 text-[10px] text-slate-500 font-bold tracking-widest">METALS</div>
             <div id="icon-metal" class="text-3xl mb-1">⚖️</div>
-            <div id="status-metal" class="text-[10px] font-bold text-slate-600 bg-slate-950 px-2 py-0.5 rounded-full">NO DATA</div>
+            <div id="status-metal" class="text-xs font-bold text-slate-600 bg-slate-950 px-3 py-1 rounded-full">NO DATA</div>
         </div>
 
         <div id="card-roman" class="status-box bg-slate-900 border border-slate-700 rounded-2xl p-2 flex flex-col items-center justify-center text-center relative overflow-hidden">
-            <div class="absolute top-2 text-[8px] text-slate-500 font-bold tracking-widest">ROMAN</div>
-            <div id="icon-roman" class="text-3xl mb-1">🚀</div>
-            <div id="status-roman" class="text-[10px] font-bold text-slate-600 bg-slate-950 px-2 py-0.5 rounded-full">NO DATA</div>
+            <div class="absolute top-2 text-[10px] text-slate-500 font-bold tracking-widest">ROMAN</div>
+            <div id="icon-roman" class="text-3xl mb-1">💎</div> <div id="status-roman" class="text-xs font-bold text-slate-600 bg-slate-950 px-3 py-1 rounded-full">NO DATA</div>
         </div>
     </div>
 
-    <button onclick="startScan()" id="scan-btn" class="btn-push w-full py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg shadow-indigo-900/50 flex items-center justify-center gap-2 transition-all">
-        <span class="text-xl">📡</span>
-        <span id="btn-text" class="tracking-widest">全域スキャン開始</span>
-    </button>
+    <button onclick="startScan()" id="scan-btn" class="btn-push w-full py-6 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg shadow-indigo-900/50 flex items-center justify-center gap-3 transition-all">
+        <span class="text-2xl">📡</span>
+        <span id="btn-text" class="text-lg tracking-widest">全域スキャン開始</span> </button>
 
     <div class="flex-grow overflow-y-auto no-scrollbar relative">
         <details id="report-details" class="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden group">
@@ -90,14 +81,15 @@
                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Intelligence Log</span>
                 <span class="text-[10px] text-indigo-400 group-open:rotate-180 transition-transform">▼ OPEN</span>
             </summary>
-            <div class="p-4 pt-2 border-t border-slate-800">
-                <div id="report-content" class="text-[11px] text-slate-300 leading-relaxed font-mono whitespace-pre-wrap">
-提督、システムオールグリーン。
-「全域スキャン開始」ボタンで、以下の3戦線を同時偵察するデグ！
+            <div class="p-5 pt-3 border-t border-slate-800">
+                <div id="report-content" class="text-sm text-slate-300 leading-relaxed font-mono whitespace-pre-wrap">
+提督、視認性向上改修完了。
+文字サイズを拡大し、可読性を強化したデグ！
 
-1. NAS戦線 (QQQM/NDX)
-2. 資源戦線 (金/銀/銅)
-3. ロマン砲 (IONQ/J-TEC/EDP)
+▼ 監視対象 (自動更新):
+1. NAS: ナスダック100 (QQQM)
+2. METAL: 金・銀・銅・チタン
+3. ROMAN: J-TEC・旭ダイヤ・三井金属・大阪チタ・EDP・LITEなど
                 </div>
                 <div id="report-links" class="mt-4 flex flex-wrap gap-2"></div>
             </div>
@@ -106,9 +98,8 @@
 
     <script>
         let apiKey = localStorage.getItem("gemini_api_key_v2");
-        let currentModel = "gemini-1.5-flash"; // Default
+        let currentModel = "gemini-1.5-flash"; 
 
-        // --- 初期化 ---
         function init() {
             if (!apiKey) {
                 let input = prompt("APIキーを入力するデグ！(AIza...)");
@@ -125,47 +116,43 @@
         setInterval(updateClock, 1000);
         setTimeout(init, 500);
 
-        // --- モデル自動選択 ---
         async function findBestModel() {
             if(!apiKey) return;
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
                 const data = await res.json();
                 const models = data.models?.filter(m => m.supportedGenerationMethods?.includes("generateContent")) || [];
-                // 優先順位: Flash系 > Pro系 > その他
                 const best = models.find(m => m.name.includes("flash")) || models[0];
                 if (best) {
                     currentModel = best.name.replace("models/", "");
                     document.getElementById('model-badge').innerText = "LINKED: " + currentModel;
-                    document.getElementById('model-badge').className = "text-[9px] bg-green-900/50 text-green-400 px-1.5 py-0.5 rounded border border-green-800";
+                    document.getElementById('model-badge').className = "text-[10px] bg-green-900/50 text-green-400 px-2 py-0.5 rounded border border-green-800";
                 }
             } catch(e) { console.error(e); }
         }
 
-        // --- 色判定ロジック ---
         function updateStatus(id, color) {
             const card = document.getElementById(`card-${id}`);
             const statusText = document.getElementById(`status-${id}`);
             
-            // Reset classes
+            // クラスをリセット (h-fullを追加して高さを維持)
             card.className = "status-box border rounded-2xl p-2 flex flex-col items-center justify-center text-center relative overflow-hidden h-full";
             
             if (color === "RED") {
                 card.classList.add("bg-red-950/30", "border-red-500", "blink-red");
-                statusText.className = "text-[10px] font-bold text-red-100 bg-red-600 px-3 py-0.5 rounded-full shadow-[0_0_10px_#ef4444]";
+                statusText.className = "text-xs font-bold text-red-100 bg-red-600 px-3 py-1 rounded-full shadow-[0_0_10px_#ef4444]";
                 statusText.innerText = "CRITICAL";
             } else if (color === "YELLOW") {
                 card.classList.add("bg-yellow-950/20", "border-yellow-500", "glow-yellow");
-                statusText.className = "text-[10px] font-bold text-yellow-100 bg-yellow-600 px-3 py-0.5 rounded-full shadow-[0_0_10px_#eab308]";
+                statusText.className = "text-xs font-bold text-yellow-100 bg-yellow-600 px-3 py-1 rounded-full shadow-[0_0_10px_#eab308]";
                 statusText.innerText = "WARNING";
             } else {
                 card.classList.add("bg-green-950/20", "border-green-500", "glow-green");
-                statusText.className = "text-[10px] font-bold text-green-100 bg-green-600 px-3 py-0.5 rounded-full shadow-[0_0_10px_#22c55e]";
+                statusText.className = "text-xs font-bold text-green-100 bg-green-600 px-3 py-1 rounded-full shadow-[0_0_10px_#22c55e]";
                 statusText.innerText = "NORMAL";
             }
         }
 
-        // --- メインスキャン処理 ---
         async function startScan() {
             if(!apiKey) { init(); return; }
 
@@ -174,25 +161,22 @@
             const details = document.getElementById('report-details');
             const links = document.getElementById('report-links');
 
-            // UI Reset
             btn.disabled = true;
-            document.getElementById('btn-text').innerText = "偵察衛星アクセス中...";
+            document.getElementById('btn-text').innerText = "通信中...";
             document.querySelectorAll('.status-box').forEach(el => el.classList.add('animate-pulse'));
-            content.innerText = "Gemini衛星よりデータ受信中... \n全セクターの戦況を分析しています...";
-
-            // 🕒 ここで「現在の年月」を自動生成するデグ！
-            const now = new Date();
-            const currentMonth = `${now.getFullYear()}年${now.getMonth() + 1}月`; // 例: "2026年3月"
+            content.innerText = "Gemini衛星データ受信中... \n全セクターをスキャンしています...";
             
-            // 提督のポートフォリオ検索クエリ
+            // 🕒 自動日付取得 & ロマン砲追加済みの最新クエリ
+            const now = new Date();
+            const currentMonth = `${now.getFullYear()}年${now.getMonth() + 1}月`;
+
             const query = `
                 最新ニュースと株価動向を検索 (${currentMonth}時点):
                 1. 米国株 NASDAQ100 (QQQM) ${currentMonth} 見通し
                 2. 商品先物 金 銀 銅 価格 (Gold Silver Copper)
-                3. 注目銘柄: 旭ダイヤモンド工業(6140), 三井金属(5706), 大阪チタニウム(5726), LITE,COHR,MU,SNDK, J-TEC(3446), EDP(7794),日本電気硝子(5214)
+                3. 注目銘柄: 日本電気硝子(5214),ジェイテックＣ (3446),EDP(7794),旭ダイヤモンド工業(6140), 三井金属(5706), 大阪チタニウム(5726), LITE,COHR,MU,SNDK 
             `;
 
-            // AIへの指示（重要：フォーマット指定）
             const systemPrompt = `
                 あなたは軍事AI「OCTODON」です。提督のために市場を偵察してください。
                 以下の3カテゴリについて、暴落リスクや悪いニュースがあれば「RED」、注意が必要なら「YELLOW」、順調なら「GREEN」と判定し、
@@ -201,9 +185,9 @@
                 FLAGS: NAS=COLOR, METAL=COLOR, ROMAN=COLOR
 
                 その後の行で、各セクターの戦況を「軍事報告風」に簡潔に要約してください。
-                - NAS: ナスダック100
+                - NAS: ナスダック100 (QQQM)
                 - METAL: 金・銀・銅
-                - ROMAN: 旭ダイヤモンド工業(6140), 三井金属(5706), 大阪チタニウム(5726), LITE,COHR,MU,SNDK, J-TEC(3446), EDP(7794),日本電気硝子(5214) (通称:ロマン砲)
+                - ROMAN: 日本電気硝子(5214),ジェイテックＣ (3446),EDP(7794),旭ダイヤモンド工業(6140), 三井金属(5706), 大阪チタニウム(5726), LITE,COHR,MU,SNDK  (通称:ロマン砲)
                 **重要発表や今後の株価に反映されうる関連ニュースがある場合、特記事項として銘柄（あれば証券コード）毎に詳細な報告を追記してください
             `;
 
@@ -221,12 +205,10 @@
                 const data = await res.json();
                 const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "応答なし";
                 
-                // 1行目のフラグを解析 (例: FLAGS: NAS=RED, METAL=GREEN...)
                 const lines = rawText.split('\n');
                 const flagLine = lines[0];
                 const reportBody = lines.slice(1).join('\n').trim();
 
-                // 色の適用
                 const parseColor = (key) => {
                     if (flagLine.includes(`${key}=RED`)) return "RED";
                     if (flagLine.includes(`${key}=YELLOW`)) return "YELLOW";
@@ -237,24 +219,21 @@
                 updateStatus("metal", parseColor("METAL"));
                 updateStatus("roman", parseColor("ROMAN"));
 
-                // レポート表示
                 content.innerText = reportBody;
                 
-                // リンク処理
                 const attributions = data.candidates?.[0]?.groundingMetadata?.groundingAttributions || [];
                 links.innerHTML = attributions.flatMap(a => 
-                    a.web?.uri ? [`<a href="${a.web.uri}" target="_blank" class="text-[9px] bg-slate-800 px-2 py-1 rounded text-indigo-400 underline truncate max-w-[100px] inline-block">${a.web.title?.slice(0,10)}</a>`] : []
+                    a.web?.uri ? [`<a href="${a.web.uri}" target="_blank" class="text-[10px] bg-slate-800 px-3 py-1.5 rounded text-indigo-400 underline inline-block mb-1">${a.web.title?.slice(0,12)}...</a>`] : []
                 ).join('');
 
-                // 警告(RED/YELLOW)がある場合のみ、自動で詳細を開く
                 if (flagLine.includes("RED") || flagLine.includes("YELLOW")) {
                     details.open = true;
                 } else {
-                    details.open = false; // 平和なら閉じたまま（スマート！）
+                    details.open = false; 
                 }
 
             } catch (e) {
-                content.innerText = "通信妨害発生！再試行せよ。\n" + e.message;
+                content.innerText = "通信エラー発生！\n" + e.message;
             } finally {
                 btn.disabled = false;
                 document.getElementById('btn-text').innerText = "再スキャン";
