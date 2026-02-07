@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Octodon System v13</title>
+    <title>Octodon System v13.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&family=Orbitron:wght@900&display=swap');
@@ -169,6 +169,7 @@
             // 🕒 自動日付取得 & ロマン砲追加済みの最新クエリ
             const now = new Date();
             const currentMonth = `${now.getFullYear()}年${now.getMonth() + 1}月`;
+            const dateString = now.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 
             const query = `
                 最新ニュースと株価動向を検索 (${currentMonth}時点):
@@ -179,21 +180,27 @@
 
             const systemPrompt = `
                 あなたは軍事AI「OCTODON」です。提督のために市場を偵察してください。
-                以下の3カテゴリについて、暴落リスクや悪いニュースがあれば「RED」、注意が必要なら「YELLOW」、順調なら「GREEN」と判定し、
-                **必ず回答の1行目に** 以下の形式で出力してください。
+                以下の日付における最新の市場ニュースをGoogle検索し、分析してください。
+               【現在日時: ${dateString}】
+            
+                ※重要: 古い記事は無視し、直近24時間〜1週間以内のニュースを優先すること。
+
+                出力形式:
+                 以下の3カテゴリについて、暴落リスクや悪いニュースがあれば「RED」、注意が必要なら「YELLOW」、順調なら「GREEN」と判定し、
+                 **必ず回答の1行目に** 以下の形式で出力してください。
 
                 FLAGS: NAS=COLOR, METAL=COLOR, ROMAN=COLOR
 
                 その後の行で、各セクターの戦況を「軍事報告風」に簡潔に要約してください。
                 - NAS: ナスダック100 (QQQM)
                 - METAL: 金・銀・銅
-                - ROMAN: 日本電気硝子(5214),ジェイテックＣ (3446),EDP(7794),旭ダイヤモンド工業(6140), 三井金属(5706), 大阪チタニウム(5726), LITE,COHR,MU,SNDK  (通称:ロマン砲)
+                - ROMAN: 日本電気硝子(5214),ジェイテックＣ (3446),EDP(7794),旭ダイヤモンド工業(6140), 三井金属(5706), 大阪チタニウム(5726), LITE,COHR,MU,IONQ  (通称:ロマン砲)
                 
                 **重要発表や今後の株価に反映されうる関連ニュースがある場合、特記事項として以下の形式で詳細な情報を追記してください
                 ⭐︎銘柄（あれば証券コード）
                 詳細な情報とアクションプランの提案
                 （次の銘柄と一行空ける）
-                **上記の⭐︎は以下のマークに読み替えてください（ポジティブなニュース：🟢／ネガティブなニュース：🔴／今の時点では判断できない重要なニュース：🟡）
+                **上記の⭐︎は以下のマークに読み替えてください（機関投資家による大量売りが発生中：🔥／ポジティブな決算と株価の下落が発生中（地合いの悪さで発生する下落）：💎／その他重要なニュース：🟡）
             `;
 
             try {
