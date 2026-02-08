@@ -194,8 +194,8 @@
                 const data = await res.json();
                 
                 // Flash系とPro系を探す
-                const flash = data.models.find(m => m.name.includes("2.0-flash")) || data.models.find(m => m.name.includes("1.5-flash"));
-                const pro = data.models.find(m => m.name.includes("1.5-pro")) || flash; // ProがなければFlashで代用
+                const flash = data.models.find(m => m.name.includes("2.5-flash")) || data.models.find(m => m.name.includes("2.0-flash"));
+                const pro = data.models.find(m => m.name.includes("2.5-pro")) || flash; // ProがなければFlashで代用
 
                 if(flash) SCOUT_MODEL = flash.name.replace("models/", "");
                 if(pro) COMMANDER_MODEL = pro.name.replace("models/", "");
