@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OCTODON SYSTEM v15.0 - TACTICAL MONITOR</title>
+    <title>OCTODON SYSTEM v15.1 - TACTICAL MONITOR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&family=Black+Ops+One&display=swap');
@@ -24,7 +24,7 @@
 
         .cyber-font { font-family: 'Black Ops One', cursive; letter-spacing: 0.1em; }
         
-        /* ステータスカードのアニメーション */
+        /* ステータスカード */
         .status-box { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #1e293b; }
         
         /* 状態別スタイル */
@@ -72,9 +72,6 @@
             border: 1px solid #334155;
             box-shadow: inset 0 0 20px #020617;
         }
-        
-        details > summary { list-style: none; cursor: pointer; }
-        details > summary::-webkit-details-marker { display: none; }
     </style>
 </head>
 <body class="space-y-3"> 
@@ -85,7 +82,7 @@
                 <span onclick="resetApiKey()" class="text-[10px] text-slate-600 hover:text-red-500 cursor-pointer font-bold tracking-widest">[RESET KEY]</span>
                 <span id="model-badge" class="text-[9px] bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded text-slate-500">SYSTEM OFFLINE</span>
             </div>
-            <h1 class="text-2xl cyber-font text-white leading-none tracking-tighter">OCTODON <span class="text-indigo-500">SYS.15</span></h1> 
+            <h1 class="text-2xl cyber-font text-white leading-none tracking-tighter">OCTODON <span class="text-indigo-500">SYS.15.1</span></h1> 
         </div>
         <div class="text-right">
             <div class="text-[9px] text-slate-500">JST (TOKYO)</div>
@@ -141,9 +138,11 @@
     <script>
         // --- 設定変数 ---
         let apiKey = localStorage.getItem("octdon_api_key");
-        let SCOUT_MODEL = "gemini-1.5-flash"; // 速度優先
-        let COMMANDER_MODEL = "gemini-1.5-pro"; // 賢さ優先
         
+        // デフォルト設定（initで上書きされる）
+        let SCOUT_MODEL = "gemini-1.5-flash"; 
+        let COMMANDER_MODEL = "gemini-1.5-pro"; 
+
         // --- 初期化処理 ---
         async function init() {
             updateClock();
@@ -182,26 +181,28 @@
             }
         }
 
-        // --- モデル自動検出 ---
+        // --- モデル自動検出 (2.0優先ロジック) ---
         async function detectModels() {
             const badge = document.getElementById('model-badge');
             badge.innerText = "CONNECTING...";
             try {
-                // モデルリストを取得して、利用可能な最新モデルを探す
                 const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
                 const res = await fetch(url);
                 if (!res.ok) throw new Error("Connection Failed");
                 const data = await res.json();
                 
-                // Flash系とPro系を探す
+                // 優先順位: 2.5-flash > 2.0-flash
                 const flash = data.models.find(m => m.name.includes("2.5-flash")) || data.models.find(m => m.name.includes("2.0-flash"));
-                const pro = data.models.find(m => m.name.includes("2.5-pro")) || flash; // ProがなければFlashで代用
+                
+                // 優先順位: 2.5-pro-exp > 2.0-pro
+                const pro = data.models.find(m => m.name.includes("2.5-pro-exp")) || data.models.find(m => m.name.includes("2.0-pro")) || flash;
 
                 if(flash) SCOUT_MODEL = flash.name.replace("models/", "");
                 if(pro) COMMANDER_MODEL = pro.name.replace("models/", "");
 
                 badge.innerText = `LINKED: ${SCOUT_MODEL.split('-')[1].toUpperCase()} / ${COMMANDER_MODEL.split('-')[1].toUpperCase()}`;
                 badge.className = "text-[9px] bg-indigo-900 border border-indigo-500 px-1.5 py-0.5 rounded text-indigo-300";
+                
                 log(`SCOUT UNIT: ${SCOUT_MODEL}`);
                 log(`COMMANDER: ${COMMANDER_MODEL}`);
 
@@ -212,7 +213,7 @@
             }
         }
 
-        // --- Gemini API 呼び出し関数 ---
+        // --- API呼び出し (Base) ---
         async function callGemini(model, text, useSearch = false) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             const payload = {
@@ -230,11 +231,34 @@
 
             if (!res.ok) {
                 if(res.status === 429) throw new Error("Rate Limit Exceeded (429)");
+                if(res.status === 503) throw new Error("Model Overloaded (503)");
                 throw new Error(`API Error ${res.status}`);
             }
 
             const data = await res.json();
             return data.candidates?.[0]?.content?.parts?.[0]?.text || "No Response";
+        }
+
+        // --- ★重要: フェイルオーバー付き呼び出し関数 ---
+        async function callGeminiSafe(primaryModel, backupModel, text, useSearch = false) {
+            try {
+                log(`>> CONNECTING TO: ${primaryModel}...`);
+                return await callGemini(primaryModel, text, useSearch);
+            } catch (e) {
+                // メインモデルで失敗した場合
+                log(`⚠️ WARNING: ${primaryModel} FAILED (${e.message})`);
+                
+                // バックアップがあって、かつメインと違う場合のみリトライ
+                if (backupModel && primaryModel !== backupModel) {
+                    log(`🔄 REROUTING TO BACKUP: ${backupModel}...`);
+                    
+                    // 少し休む (1.5秒)
+                    await new Promise(r => setTimeout(r, 1500));
+                    return await callGemini(backupModel, text, useSearch);
+                } else {
+                    throw e; // バックアップなしならエラーを投げる
+                }
+            }
         }
 
         // --- メイン実行処理 ---
@@ -247,7 +271,7 @@
 
             // UIリセット
             btn.disabled = true;
-            document.querySelectorAll('.status-box').forEach(el => el.className = 'status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative'); // クラス初期化
+            document.querySelectorAll('.status-box').forEach(el => el.className = 'status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative'); 
             ['nas','metal','jp','us'].forEach(id => document.getElementById(`status-${id}`).innerText = "SCANNING...");
             
             try {
@@ -255,77 +279,93 @@
                 const now = new Date();
                 const dateStr = now.toLocaleDateString('ja-JP');
                 const prevDate = new Date(now);
-                prevDate.setDate(prevDate.getDate() - 3); // 念のため3日前から検索対象に（週末またぎ対策）
+                prevDate.setDate(prevDate.getDate() - 2); 
                 const afterStr = `after:${prevDate.toISOString().split('T')[0]}`;
 
-                // PHASE 1: 偵察部隊 (Scouts) - Flashモデル
+                // --- PHASE 1: 偵察部隊 (SCOUT) ---
                 btnText.innerText = "PHASE 1: SCOUTING";
-                pBar.style.width = "20%";
+                pBar.style.width = "10%";
                 log("DEPLOYING SCOUTS...");
 
-                // クエリ定義 (JP/US分割版)
+                // 検索クエリ
                 const queries = [
-                    { id: "nas", q: `NASDAQ100 S&P500 ${afterStr} 株価 ニュース (Open High Low Close)` },
-                    { id: "metal", q: `Gold Silver Copper price ${afterStr} (Open High Low Close)` },
+                    { id: "nas", q: `NASDAQ100 S&P500 ${afterStr} latest price news (Open High Low Close)` },
+                    { id: "metal", q: `Gold Silver Copper WTI Crude Oil price ${afterStr} latest (Open High Low Close)` },
                     { id: "jp", q: `日本電気硝子(5214) ジェイテックＣ(3446) EDP(7794) 旭ダイヤモンド(6140) 三井金属(5706) 大阪チタニウム(5726) 株価 決算 ${afterStr} (始値 高値 安値 終値)` },
                     { id: "us", q: `LITE COHR MU IONQ stock price news ${afterStr} (Open High Low Close)` }
                 ];
 
                 let scoutReport = `REPORT DATE: ${dateStr}\n\n`;
 
-                // 4部隊を順番に実行 (API制限回避のため並列ではなく直列推奨)
+                // 直列実行でAPI負荷を分散
                 for (let i = 0; i < queries.length; i++) {
                     const s = queries[i];
                     log(`>> SCANNING SECTOR: ${s.id.toUpperCase()}...`);
                     
-                    // ウェイトを入れる (1秒)
+                    // 1秒待機 (RPM対策)
                     await new Promise(r => setTimeout(r, 1000));
-                    
-                    const res = await callGemini(SCOUT_MODEL, `以下の最新情報を検索し、数値データ(OHLC)とニュースを事実のみ箇条書きせよ。\n検索: ${s.q}`, true);
+
+                    // 要約指示 (TPM対策: 400文字制限)
+                    const scoutPrompt = `
+以下の最新情報を検索し、**400文字以内のレポート**にまとめてください。
+余計な前置きは不要。事実と数値のみを箇条書きにすること。
+特に「行って来い（Reversal）」や「急騰・急落」の兆候があれば強調せよ。
+
+■検索対象: ${s.q}
+`;
+                    // SCOUTは常にFlashで実行 (高速・軽量)
+                    const res = await callGemini(SCOUT_MODEL, scoutPrompt, true);
                     scoutReport += `【SECTOR: ${s.id.toUpperCase()}】\n${res}\n\n`;
+                    
+                    // 進捗バー更新
                     pBar.style.width = `${20 + (i+1)*15}%`;
                 }
 
-                // PHASE 2: 指揮官分析 (Commander) - Proモデル
+                // --- PHASE 2: 司令官分析 (COMMANDER) ---
                 btnText.innerText = "PHASE 2: TACTICAL ANALYSIS";
                 log("UPLOADING DATA TO COMMANDER...");
                 
+                // 3秒待機 (RPM対策: 念入りに)
+                await new Promise(r => setTimeout(r, 3000));
+
                 const systemPrompt = `
-あなたは軍事AI「OCTODON」です。偵察部隊のデータを分析し、軍事報告書を作成してください。
+あなたは軍事AI「OCTODON」です。偵察部隊の要約データを分析し、戦況報告書を作成してください。
 
 ## 重要指令: ローソク足分析（行って来い判定）
-各セクターについて、**「終値」だけでなく「日中変動幅（High - Low）」**を確認してください。
-- もし「実体（始値-終値）」が小さいのに、「変動幅」が大きい場合（長いヒゲや十字線）は、**『戦況の膠着』**または**『攻勢の失敗（Reversal）』**と判定してください。
+「終値」だけでなく「日中変動幅（High - Low）」を確認し、もし「実体が小さいのにヒゲが長い（行って来い）」場合は、**『攻勢失敗（Reversal）』**と判定せよ。
 
-## 出力ルール
+## 出力ルール (厳守)
 1行目に必ず以下のフラグを出力すること:
 FLAGS: NAS=[COLOR], METAL=[COLOR], JP=[COLOR], US=[COLOR]
 ※ COLORは RED(危険), YELLOW(注意), GREEN(順調) のいずれか。
 
 ## レポート本文フォーマット
-### 📊 SECTOR: NAS
+### 🍆 SECTOR: NAS
 - 状況: (簡潔な戦況)
 ... (以下、METAL, JP, USと続く)
 
 ## 特記事項
-重要な動き（暴騰・暴落・行って来い）がある銘柄のみ:
+動きがある銘柄のみ抽出:
 ⭐︎ [銘柄名] : [判定アイコン] [詳細]
-(アイコン: 🔥敵襲/売り, 💎補給/買い, 🔄押し戻し/行って来い, 🟡膠着)
+(アイコン: 🔥（敵襲/売り）, 💎（補給/買い）, 🔄（押し戻し/行って来い）, 🟡（膠着）, 🚨（急変） ※アイコンのみ表示すること) 
 `;
                 
-                const analysis = await callGemini(COMMANDER_MODEL, systemPrompt + "\n\n" + scoutReport, false);
+                // ★ここでフェイルオーバー発動
+                // COMMANDER(Pro)で挑み、ダメならSCOUT(Flash)に委譲する
+                const analysis = await callGeminiSafe(COMMANDER_MODEL, SCOUT_MODEL, systemPrompt + "\n\n" + scoutReport, false);
+                
                 pBar.style.width = "100%";
                 log("MISSION COMPLETE.");
 
-                // 結果のパースと表示
+                // --- 結果表示 ---
                 const lines = analysis.split('\n');
                 const flagLine = lines.find(l => l.includes("FLAGS:")) || "";
                 
-                // フラグ解析関数
+                // フラグ解析
                 const getColor = (key) => {
                     if (flagLine.includes(`${key}=RED`)) return "red";
                     if (flagLine.includes(`${key}=YELLOW`)) return "yellow";
-                    return "green";
+                    return "green"; // デフォルト
                 };
 
                 // UI更新
@@ -335,23 +375,21 @@ FLAGS: NAS=[COLOR], METAL=[COLOR], JP=[COLOR], US=[COLOR]
                     const el = document.getElementById(`card-${id}`);
                     const badge = document.getElementById(`status-${id}`);
                     
-                    // クラス適用
                     el.classList.add(`status-${color}`);
                     badge.innerText = statusText;
                     
-                    // バッジの色調整
                     if(color === 'red') badge.className = "mt-1 text-[9px] px-2 py-0.5 bg-red-600 text-white rounded font-bold";
                     if(color === 'yellow') badge.className = "mt-1 text-[9px] px-2 py-0.5 bg-yellow-600 text-black rounded font-bold";
                     if(color === 'green') badge.className = "mt-1 text-[9px] px-2 py-0.5 bg-green-600 text-white rounded font-bold";
                 });
 
-                // レポート表示（FLAGS行を除去）
+                // レポート本文表示（FLAGS行を削除）
                 document.getElementById('report-content').innerText = analysis.replace(flagLine, "").trim();
 
             } catch (e) {
                 console.error(e);
                 log(`FATAL ERROR: ${e.message}`);
-                document.getElementById('report-content').innerText = "通信エラーが発生しました。時間を置いて再試行してください。\n" + e.message;
+                document.getElementById('report-content').innerText = "SYSTEM FAILURE.\n\n" + e.message + "\n\n(時間を置いて再試行してください)";
             } finally {
                 btn.disabled = false;
                 btnText.innerText = "RE-SCAN";
