@@ -2,344 +2,365 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Octodon System v14.2 Auto-Detect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OCTODON SYSTEM v15.0 - TACTICAL MONITOR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&family=Orbitron:wght@900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&family=Black+Ops+One&display=swap');
         
         body { 
-            background-color: #020617; 
-            color: #f8fafc; 
+            background-color: #050505; 
+            color: #e2e8f0; 
             font-family: 'JetBrains Mono', monospace;
             height: 100vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            padding: 16px;
+            /* iPhoneのセーフエリア対応 */
             padding-top: max(20px, env(safe-area-inset-top));
             padding-bottom: max(20px, env(safe-area-inset-bottom));
         }
 
-        .cyber-font { font-family: 'Orbitron', sans-serif; }
-        .status-box { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .blink-red { animation: blink-red 1s infinite; background-color: rgba(239, 68, 68, 0.2); border-color: #ef4444; }
-        .glow-green { box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); border-color: #22c55e; background-color: rgba(20, 83, 45, 0.3); }
-        .glow-yellow { box-shadow: 0 0 15px rgba(234, 179, 8, 0.3); border-color: #eab308; background-color: rgba(113, 63, 18, 0.3); }
+        .cyber-font { font-family: 'Black Ops One', cursive; letter-spacing: 0.1em; }
         
-        @keyframes blink-red {
-            0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); opacity: 1; }
-            50% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.9); opacity: 0.8; }
+        /* ステータスカードのアニメーション */
+        .status-box { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #1e293b; }
+        
+        /* 状態別スタイル */
+        .status-red { 
+            background: linear-gradient(135deg, rgba(69,10,10,0.8) 0%, rgba(0,0,0,0.9) 100%);
+            border-color: #ef4444; 
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            animation: pulse-red 2s infinite;
+        }
+        .status-yellow { 
+            background: linear-gradient(135deg, rgba(66,32,6,0.8) 0%, rgba(0,0,0,0.9) 100%);
+            border-color: #eab308; 
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.3);
+        }
+        .status-green { 
+            background: linear-gradient(135deg, rgba(20,83,45,0.8) 0%, rgba(0,0,0,0.9) 100%);
+            border-color: #22c55e; 
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
         }
 
-        .btn-push:active { transform: scale(0.96); }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* UIパーツ */
+        .scan-btn {
+            background: linear-gradient(90deg, #4f46e5 0%, #3730a3 100%);
+            position: relative; overflow: hidden;
+        }
+        .scan-btn:active { transform: scale(0.98); }
+        .scan-btn::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        .scan-btn:hover::after { left: 100%; }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        details > summary { list-style: none; }
+        /* ターミナル風出力エリア */
+        .terminal-window {
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            box-shadow: inset 0 0 20px #020617;
+        }
+        
+        details > summary { list-style: none; cursor: pointer; }
         details > summary::-webkit-details-marker { display: none; }
-        details[open] summary ~ * { animation: sweep .3s ease-in-out; }
-        @keyframes sweep { 0% {opacity: 0; transform: translateY(-10px)} 100% {opacity: 1; transform: translateY(0)} }
-        .progress-bar { transition: width 0.3s ease; }
-        .reset-link:hover { text-decoration: underline; color: #ef4444; cursor: pointer; }
     </style>
 </head>
-<body class="space-y-4"> 
-    <header class="flex justify-between items-end pb-3 border-b border-slate-800">
+<body class="space-y-3"> 
+
+    <header class="flex justify-between items-end pb-2 border-b border-slate-800">
         <div>
-            <div class="flex items-center gap-2">
-                <span onclick="resetApiKey()" class="text-xs text-slate-500 font-bold tracking-widest reset-link" title="Click to Reset API Key">OCTODON v14.2 [RESET]</span>
-                <span id="model-badge" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">INITIALIZING...</span>
+            <div class="flex items-center gap-2 mb-1">
+                <span onclick="resetApiKey()" class="text-[10px] text-slate-600 hover:text-red-500 cursor-pointer font-bold tracking-widest">[RESET KEY]</span>
+                <span id="model-badge" class="text-[9px] bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded text-slate-500">SYSTEM OFFLINE</span>
             </div>
-            <h1 class="text-3xl cyber-font text-white leading-none mt-1">DUAL CORE</h1> 
+            <h1 class="text-2xl cyber-font text-white leading-none tracking-tighter">OCTODON <span class="text-indigo-500">SYS.15</span></h1> 
         </div>
-        <div id="clock" class="text-sm font-bold text-slate-500 cyber-font">00:00</div> 
+        <div class="text-right">
+            <div class="text-[9px] text-slate-500">JST (TOKYO)</div>
+            <div id="clock" class="text-xl font-bold text-slate-400 cyber-font">00:00:00</div> 
+        </div>
     </header>
 
-    <div class="grid grid-cols-3 gap-3 min-h-[8rem]">
-        <div id="card-nas" class="status-box bg-slate-900 border border-slate-700 rounded-2xl p-1 flex flex-col items-center justify-center text-center relative overflow-hidden h-full">
-            <div class="absolute top-2 text-[9px] text-slate-500 font-bold tracking-widest">NASDAQ</div> <div id="icon-nas" class="text-2xl mb-1">🦅</div>
-            <div id="status-nas" class="text-[10px] font-bold text-slate-600 bg-slate-950 px-2 py-1 rounded-full">NO DATA</div> 
+    <div class="grid grid-cols-2 gap-2 h-32 md:h-40">
+        <div id="card-nas" class="status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative">
+            <div class="absolute top-1 left-2 text-[8px] text-slate-500 tracking-widest">SECTOR 01</div>
+            <div class="text-lg mb-1">🦅</div>
+            <div class="text-xs font-bold text-slate-300">NASDAQ</div>
+            <div id="status-nas" class="mt-1 text-[9px] px-2 py-0.5 bg-slate-950 rounded text-slate-600">WAITING</div> 
         </div>
-        <div id="card-metal" class="status-box bg-slate-900 border border-slate-700 rounded-2xl p-1 flex flex-col items-center justify-center text-center relative overflow-hidden h-full">
-            <div class="absolute top-2 text-[9px] text-slate-500 font-bold tracking-widest">METALS</div>
-            <div id="icon-metal" class="text-2xl mb-1">⚖️</div>
-            <div id="status-metal" class="text-[10px] font-bold text-slate-600 bg-slate-950 px-2 py-1 rounded-full">NO DATA</div>
+        <div id="card-metal" class="status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative">
+            <div class="absolute top-1 left-2 text-[8px] text-slate-500 tracking-widest">SECTOR 02</div>
+            <div class="text-lg mb-1">⚖️</div>
+            <div class="text-xs font-bold text-slate-300">COMMODITY</div>
+            <div id="status-metal" class="mt-1 text-[9px] px-2 py-0.5 bg-slate-950 rounded text-slate-600">WAITING</div>
         </div>
-        <div id="card-roman" class="status-box bg-slate-900 border border-slate-700 rounded-2xl p-1 flex flex-col items-center justify-center text-center relative overflow-hidden h-full">
-            <div class="absolute top-2 text-[9px] text-slate-500 font-bold tracking-widest">ROMAN</div>
-            <div id="icon-roman" class="text-2xl mb-1">💎</div> 
-            <div id="status-roman" class="text-[10px] font-bold text-slate-600 bg-slate-950 px-2 py-1 rounded-full">NO DATA</div>
+        <div id="card-jp" class="status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative">
+            <div class="absolute top-1 left-2 text-[8px] text-slate-500 tracking-widest">SECTOR 03</div>
+            <div class="text-lg mb-1">🎖️</div>
+            <div class="text-xs font-bold text-slate-300">JP FORCE</div>
+            <div id="status-jp" class="mt-1 text-[9px] px-2 py-0.5 bg-slate-950 rounded text-slate-600">WAITING</div>
+        </div>
+        <div id="card-us" class="status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative">
+            <div class="absolute top-1 left-2 text-[8px] text-slate-500 tracking-widest">SECTOR 04</div>
+            <div class="text-lg mb-1">🇺🇸</div>
+            <div class="text-xs font-bold text-slate-300">US FORCE</div>
+            <div id="status-us" class="mt-1 text-[9px] px-2 py-0.5 bg-slate-950 rounded text-slate-600">WAITING</div>
         </div>
     </div>
 
-    <button onclick="executeDualCoreScan()" id="scan-btn" class="btn-push w-full py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg shadow-indigo-900/50 flex items-center justify-center gap-3 transition-all relative overflow-hidden">
-        <div id="progress-bg" class="absolute left-0 top-0 h-full bg-indigo-400/30 w-0 progress-bar"></div>
-        <span class="text-2xl relative z-10">📡</span>
-        <span id="btn-text" class="text-lg tracking-widest relative z-10">TACTICAL SCAN</span> 
+    <button onclick="executeMission()" id="scan-btn" class="scan-btn w-full py-4 text-white font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 transition-all group">
+        <span class="text-xl group-hover:rotate-90 transition-transform duration-500">✜</span>
+        <span id="btn-text" class="text-sm tracking-[0.2em] font-bold">INITIATE SCAN</span> 
+        <div id="progress-bar" class="absolute bottom-0 left-0 h-1 bg-cyan-400 w-0 transition-all duration-300"></div>
     </button>
 
-    <div class="flex-grow overflow-y-auto no-scrollbar relative">
-        <details id="report-details" class="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden group">
-            <summary class="p-3 flex justify-between items-center cursor-pointer bg-slate-800/50 hover:bg-slate-800 transition-colors">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tactical Report</span>
-                <span class="text-[10px] text-indigo-400 group-open:rotate-180 transition-transform">▼ OPEN</span>
-            </summary>
-            <div class="p-4 pt-3 border-t border-slate-800">
-                <div id="system-log" class="text-xs text-indigo-400 font-mono mb-2 border-b border-slate-800 pb-2 hidden"></div>
-                <div id="report-content" class="text-sm text-slate-300 leading-relaxed font-mono whitespace-pre-wrap">
-システム起動中... 最適なモデルを探索します。
-                </div>
-                <div id="report-links" class="mt-4 flex flex-wrap gap-2"></div>
+    <div class="flex-grow overflow-hidden flex flex-col">
+        <div class="terminal-window rounded-lg flex-grow flex flex-col overflow-hidden relative">
+            <div id="system-log" class="p-2 border-b border-slate-700 bg-slate-950 text-[10px] text-green-500 font-mono h-24 overflow-y-auto">
+                > SYSTEM READY.<br>
+                > AWAITING COMMAND...
             </div>
-        </details>
+            <div class="flex-grow overflow-y-auto p-3 text-xs leading-relaxed text-slate-300 whitespace-pre-wrap font-mono no-scrollbar" id="report-content">
+(ここに戦況報告が表示されます)
+            </div>
+        </div>
     </div>
 
     <script>
-        // 自動検出したモデルIDを格納する変数
-        let SCOUT_MODEL = ""; // Flash相当
-        let COMMANDER_MODEL = ""; // Pro相当
-        let apiKey = localStorage.getItem("gemini_api_key_v2");
-
+        // --- 設定変数 ---
+        let apiKey = localStorage.getItem("octdon_api_key");
+        let SCOUT_MODEL = "gemini-1.5-flash"; // 速度優先
+        let COMMANDER_MODEL = "gemini-1.5-pro"; // 賢さ優先
+        
+        // --- 初期化処理 ---
         async function init() {
+            updateClock();
+            setInterval(updateClock, 1000);
+
             if (!apiKey) {
-                let input = prompt("APIキーを入力してください (AIza...で始まるキー)");
-                if (input) { 
-                    apiKey = input.trim(); 
-                    localStorage.setItem("gemini_api_key_v2", apiKey);
-                    location.reload();
+                const input = prompt("OCTODON SYSTEM: APIキーを入力してください (AIza...)");
+                if (input && input.startsWith("AIza")) {
+                    apiKey = input.trim();
+                    localStorage.setItem("octdon_api_key", apiKey);
+                    log("API KEY SAVED.");
+                    detectModels();
+                } else {
+                    log("ERROR: API KEY REQUIRED.");
                 }
             } else {
-                // キーがある場合、モデルを自動探索
-                await detectModels();
-            }
-            updateClock();
-        }
-
-        // --- モデル自動検出機能 (Auto-Detector) ---
-        async function detectModels() {
-            const badge = document.getElementById('model-badge');
-            try {
-                // 利用可能なモデル一覧を取得
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-                if (!res.ok) throw new Error("Key Error");
-                
-                const data = await res.json();
-                const models = data.models || [];
-
-                // 条件に合うモデルを探す (generateContent対応必須)
-                const chatModels = models.filter(m => m.supportedGenerationMethods?.includes("generateContent"));
-
-                // 1. Flashモデル (2.0優先, なければ1.5, なければ何でも)
-                const flash = chatModels.find(m => m.name.includes("2.0-flash")) 
-                           || chatModels.find(m => m.name.includes("1.5-flash")) 
-                           || chatModels.find(m => m.name.includes("flash")) 
-                           || chatModels[0];
-                
-                // 2. Proモデル (1.5-pro優先, なければFlashで代用)
-                const pro = chatModels.find(m => m.name.includes("1.5-pro")) 
-                         || chatModels.find(m => m.name.includes("pro")) 
-                         || flash; // ProがないならFlashで代用
-
-                // IDから "models/" を除去してセット
-                SCOUT_MODEL = flash.name.replace("models/", "");
-                COMMANDER_MODEL = pro.name.replace("models/", "");
-
-                badge.innerText = `LINKED: ${SCOUT_MODEL.replace("gemini-","")} / ${COMMANDER_MODEL.replace("gemini-","")}`;
-                badge.className = "text-[10px] bg-indigo-900/50 text-indigo-300 px-2 py-0.5 rounded border border-indigo-800";
-                
-                document.getElementById('report-content').innerText = `システム準備完了。\n検出モデル:\n偵察: ${SCOUT_MODEL}\n指揮: ${COMMANDER_MODEL}`;
-
-            } catch(e) {
-                console.error(e);
-                badge.innerText = "AUTH ERROR";
-                badge.className = "text-[10px] bg-red-900/50 text-red-300 px-2 py-0.5 rounded border border-red-800";
-                document.getElementById('report-content').innerText = "APIキーが無効か、通信エラーです。左上のRESETを押して再設定してください。";
-            }
-        }
-
-        function resetApiKey() {
-            if(confirm("APIキーを削除して再設定しますか？")) {
-                localStorage.removeItem("gemini_api_key_v2");
-                location.reload();
+                detectModels();
             }
         }
 
         function updateClock() {
             const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('ja-JP', {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('clock').innerText = now.toLocaleTimeString('ja-JP');
         }
-        setInterval(updateClock, 1000);
-        setTimeout(init, 500);
 
-        // 汎用API呼び出し
-        async function callGemini(model, prompt, useSearch = false) {
-            if (!model) throw new Error("Model ID not initialized");
-            
-            const tools = useSearch ? [{ "google_search": {} }] : [];
+        function log(msg) {
+            const el = document.getElementById('system-log');
+            el.innerHTML += `> ${msg}<br>`;
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function resetApiKey() {
+            if(confirm("認証情報を破棄しますか？")) {
+                localStorage.removeItem("octdon_api_key");
+                location.reload();
+            }
+        }
+
+        // --- モデル自動検出 ---
+        async function detectModels() {
+            const badge = document.getElementById('model-badge');
+            badge.innerText = "CONNECTING...";
+            try {
+                // モデルリストを取得して、利用可能な最新モデルを探す
+                const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error("Connection Failed");
+                const data = await res.json();
+                
+                // Flash系とPro系を探す
+                const flash = data.models.find(m => m.name.includes("2.0-flash")) || data.models.find(m => m.name.includes("1.5-flash"));
+                const pro = data.models.find(m => m.name.includes("1.5-pro")) || flash; // ProがなければFlashで代用
+
+                if(flash) SCOUT_MODEL = flash.name.replace("models/", "");
+                if(pro) COMMANDER_MODEL = pro.name.replace("models/", "");
+
+                badge.innerText = `LINKED: ${SCOUT_MODEL.split('-')[1].toUpperCase()} / ${COMMANDER_MODEL.split('-')[1].toUpperCase()}`;
+                badge.className = "text-[9px] bg-indigo-900 border border-indigo-500 px-1.5 py-0.5 rounded text-indigo-300";
+                log(`SCOUT UNIT: ${SCOUT_MODEL}`);
+                log(`COMMANDER: ${COMMANDER_MODEL}`);
+
+            } catch(e) {
+                badge.innerText = "AUTH ERROR";
+                badge.className = "text-[9px] bg-red-900 border border-red-500 px-1.5 py-0.5 rounded text-red-300";
+                log(`ERROR: ${e.message}`);
+            }
+        }
+
+        // --- Gemini API 呼び出し関数 ---
+        async function callGemini(model, text, useSearch = false) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            
-            const response = await fetch(url, {
+            const payload = {
+                contents: [{ parts: [{ text: text }] }]
+            };
+            if (useSearch) {
+                payload.tools = [{ google_search: {} }];
+            }
+
+            const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                    tools: tools
-                })
+                body: JSON.stringify(payload)
             });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`API Error: ${response.status} (${errorData.error?.message || "Unknown"})`);
+            if (!res.ok) {
+                if(res.status === 429) throw new Error("Rate Limit Exceeded (429)");
+                throw new Error(`API Error ${res.status}`);
             }
-            
-            const data = await response.json();
-            return {
-                text: data.candidates?.[0]?.content?.parts?.[0]?.text || "",
-                links: data.candidates?.[0]?.groundingMetadata?.groundingAttributions || []
-            };
+
+            const data = await res.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "No Response";
         }
 
-        function updateStatus(id, color) {
-            const card = document.getElementById(`card-${id}`);
-            const statusText = document.getElementById(`status-${id}`);
-            card.className = "status-box border rounded-2xl p-1 flex flex-col items-center justify-center text-center relative overflow-hidden h-full";
-            
-            if (color === "RED") {
-                card.classList.add("bg-red-950/30", "border-red-500", "blink-red");
-                statusText.className = "text-[10px] font-bold text-red-100 bg-red-600 px-2 py-1 rounded-full shadow-[0_0_10px_#ef4444]";
-                statusText.innerText = "CRITICAL";
-            } else if (color === "YELLOW") {
-                card.classList.add("bg-yellow-950/20", "border-yellow-500", "glow-yellow");
-                statusText.className = "text-[10px] font-bold text-yellow-100 bg-yellow-600 px-2 py-1 rounded-full shadow-[0_0_10px_#eab308]";
-                statusText.innerText = "WARNING";
-            } else {
-                card.classList.add("bg-green-950/20", "border-green-500", "glow-green");
-                statusText.className = "text-[10px] font-bold text-green-100 bg-green-600 px-2 py-1 rounded-full shadow-[0_0_10px_#22c55e]";
-                statusText.innerText = "NORMAL";
-            }
-        }
-
-        async function executeDualCoreScan() {
-            if(!SCOUT_MODEL || !COMMANDER_MODEL) { await detectModels(); }
-            if(!apiKey) return;
-
+        // --- メイン実行処理 ---
+        async function executeMission() {
             const btn = document.getElementById('scan-btn');
             const btnText = document.getElementById('btn-text');
-            const progress = document.getElementById('progress-bg');
-            const content = document.getElementById('report-content');
-            const sysLog = document.getElementById('system-log');
-            const linksContainer = document.getElementById('report-links');
-            const details = document.getElementById('report-details');
+            const pBar = document.getElementById('progress-bar');
+            
+            if(!apiKey) return alert("API Key not set");
 
+            // UIリセット
             btn.disabled = true;
-            sysLog.classList.remove('hidden');
-            sysLog.innerText = `> TARGET: ${SCOUT_MODEL} & ${COMMANDER_MODEL}`;
-            content.innerText = "";
-            linksContainer.innerHTML = "";
-            progress.style.width = "10%";
-
-            const now = new Date();
-            const currentMonth = `${now.getFullYear()}年${now.getMonth() + 1}月`;
-            const dateString = now.toLocaleDateString('ja-JP');
-
+            document.querySelectorAll('.status-box').forEach(el => el.className = 'status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative'); // クラス初期化
+            ['nas','metal','jp','us'].forEach(id => document.getElementById(`status-${id}`).innerText = "SCANNING...");
+            
             try {
-                // PHASE 1: Flash Scout
-                btnText.innerText = "SCOUTING...";
-                
-                const scouts = [
-                    { id: "nas", query: `NASDAQ100 (QQQM) ${currentMonth} 株価ニュース 公式発表 経済指標` },
-                    { id: "metal", query: `金 銀 銅 価格 推移 ${currentMonth} 在庫` },
-                    { id: "roman", query: `日本電気硝子(5214) ジェイテックＣ(3446) EDP(7794) 旭ダイヤモンド(6140) 三井金属(5706) 大阪チタニウム(5726) LITE COHR MU IONQ 決算 適時開示 最新ニュース` }
+                // 日付計算
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('ja-JP');
+                const prevDate = new Date(now);
+                prevDate.setDate(prevDate.getDate() - 3); // 念のため3日前から検索対象に（週末またぎ対策）
+                const afterStr = `after:${prevDate.toISOString().split('T')[0]}`;
+
+                // PHASE 1: 偵察部隊 (Scouts) - Flashモデル
+                btnText.innerText = "PHASE 1: SCOUTING";
+                pBar.style.width = "20%";
+                log("DEPLOYING SCOUTS...");
+
+                // クエリ定義 (JP/US分割版)
+                const queries = [
+                    { id: "nas", q: `NASDAQ100 S&P500 ${afterStr} 株価 ニュース (Open High Low Close)` },
+                    { id: "metal", q: `Gold Silver Copper price ${afterStr} (Open High Low Close)` },
+                    { id: "jp", q: `日本電気硝子(5214) ジェイテックＣ(3446) EDP(7794) 旭ダイヤモンド(6140) 三井金属(5706) 大阪チタニウム(5726) 株価 決算 ${afterStr} (始値 高値 安値 終値)` },
+                    { id: "us", q: `LITE COHR MU IONQ stock price news ${afterStr} (Open High Low Close)` }
                 ];
 
-                const scoutPromises = scouts.map(async (scout) => {
-                    sysLog.innerText += `\n> SCOUTING: ${scout.id.toUpperCase()}...`;
-                    const res = await callGemini(SCOUT_MODEL, `以下の最新情報を検索し、事実のみ箇条書きで報告せよ（予想禁止）。\n検索ワード: ${scout.query}`, true);
-                    return { id: scout.id, text: res.text, links: res.links };
-                });
+                let scoutReport = `REPORT DATE: ${dateStr}\n\n`;
 
-                const scoutResults = await Promise.all(scoutPromises);
-                
-                progress.style.width = "60%";
-                sysLog.innerText += "\n> DATA GATHERED. ANALYZING...";
-                btnText.innerText = "ANALYZING...";
-
-                let combinedIntelligence = `現在日時: ${dateString}\n\n`;
-                let allLinks = [];
-
-                scoutResults.forEach(r => {
-                    combinedIntelligence += `【SECTOR: ${r.id.toUpperCase()}】\n${r.text}\n\n`;
-                    allLinks = [...allLinks, ...r.links];
-                });
-
-                // PHASE 2: Pro Commander
-                const systemPrompt = `
-                    あなたは軍事AI「OCTODON」です。
-                    偵察部隊から以下の市場データが届きました。
+                // 4部隊を順番に実行 (API制限回避のため並列ではなく直列推奨)
+                for (let i = 0; i < queries.length; i++) {
+                    const s = queries[i];
+                    log(`>> SCANNING SECTOR: ${s.id.toUpperCase()}...`);
                     
-                    ## 指示
-                    1. 感情的な煽りを排除し、事実に基づいた冷静な軍事報告調で記述してください。
-                    2. 暴落リスクや悪いニュースがあれば「RED」、注意が必要なら「YELLOW」、順調なら「GREEN」と判定してください。
-
-                    ## 出力フォーマット（厳守）
-                    1行目: FLAGS: NAS=COLOR, METAL=COLOR, ROMAN=COLOR
-                    2行目以降:
-                    - NAS: (要約)
-                    - METAL: (要約)
-                    - ROMAN: (要約)
-
-                    ## 特記事項
-                    重要発表がある場合のみ以下形式で追記:
-                    ⭐︎[銘柄名]
-                    [詳細とアクションプラン]
-                    (アイコン: 🔥売り/悪材料, 💎地合い/好材料, 🟡その他)
-                `;
-
-                const finalReport = await callGemini(COMMANDER_MODEL, systemPrompt + "\n\n" + combinedIntelligence, false);
-                
-                progress.style.width = "100%";
-                
-                const lines = finalReport.text.split('\n');
-                const flagLine = lines.find(l => l.includes("FLAGS:")) || lines[0];
-                const reportBody = finalReport.text.replace(flagLine, "").trim();
-
-                const parseColor = (key) => {
-                    if (flagLine.includes(`${key}=RED`)) return "RED";
-                    if (flagLine.includes(`${key}=YELLOW`)) return "YELLOW";
-                    return "GREEN";
-                };
-
-                updateStatus("nas", parseColor("NAS"));
-                updateStatus("metal", parseColor("METAL"));
-                updateStatus("roman", parseColor("ROMAN"));
-
-                content.innerText = reportBody;
-
-                const uniqueLinks = Array.from(new Map(allLinks.map(item => [item.web.uri, item])).values());
-                linksContainer.innerHTML = uniqueLinks.map(a => 
-                    `<a href="${a.web.uri}" target="_blank" class="text-[10px] bg-slate-800 px-3 py-1.5 rounded text-indigo-400 underline inline-block mb-1 hover:text-indigo-300 transition-colors">${a.web.title?.slice(0,15)}...</a>`
-                ).join('');
-
-                if (flagLine.includes("RED") || flagLine.includes("YELLOW")) {
-                    details.open = true;
+                    // ウェイトを入れる (1秒)
+                    await new Promise(r => setTimeout(r, 1000));
+                    
+                    const res = await callGemini(SCOUT_MODEL, `以下の最新情報を検索し、数値データ(OHLC)とニュースを事実のみ箇条書きせよ。\n検索: ${s.q}`, true);
+                    scoutReport += `【SECTOR: ${s.id.toUpperCase()}】\n${res}\n\n`;
+                    pBar.style.width = `${20 + (i+1)*15}%`;
                 }
 
-                sysLog.innerText += "\n> MISSION COMPLETE.";
+                // PHASE 2: 指揮官分析 (Commander) - Proモデル
+                btnText.innerText = "PHASE 2: TACTICAL ANALYSIS";
+                log("UPLOADING DATA TO COMMANDER...");
+                
+                const systemPrompt = `
+あなたは軍事AI「OCTODON」です。偵察部隊のデータを分析し、軍事報告書を作成してください。
+
+## 重要指令: ローソク足分析（行って来い判定）
+各セクターについて、**「終値」だけでなく「日中変動幅（High - Low）」**を確認してください。
+- もし「実体（始値-終値）」が小さいのに、「変動幅」が大きい場合（長いヒゲや十字線）は、**『戦況の膠着』**または**『攻勢の失敗（Reversal）』**と判定してください。
+
+## 出力ルール
+1行目に必ず以下のフラグを出力すること:
+FLAGS: NAS=[COLOR], METAL=[COLOR], JP=[COLOR], US=[COLOR]
+※ COLORは RED(危険), YELLOW(注意), GREEN(順調) のいずれか。
+
+## レポート本文フォーマット
+### 📊 SECTOR: NAS
+- 状況: (簡潔な戦況)
+... (以下、METAL, JP, USと続く)
+
+## 特記事項
+重要な動き（暴騰・暴落・行って来い）がある銘柄のみ:
+⭐︎ [銘柄名] : [判定アイコン] [詳細]
+(アイコン: 🔥敵襲/売り, 💎補給/買い, 🔄押し戻し/行って来い, 🟡膠着)
+`;
+                
+                const analysis = await callGemini(COMMANDER_MODEL, systemPrompt + "\n\n" + scoutReport, false);
+                pBar.style.width = "100%";
+                log("MISSION COMPLETE.");
+
+                // 結果のパースと表示
+                const lines = analysis.split('\n');
+                const flagLine = lines.find(l => l.includes("FLAGS:")) || "";
+                
+                // フラグ解析関数
+                const getColor = (key) => {
+                    if (flagLine.includes(`${key}=RED`)) return "red";
+                    if (flagLine.includes(`${key}=YELLOW`)) return "yellow";
+                    return "green";
+                };
+
+                // UI更新
+                ['nas','metal','jp','us'].forEach(id => {
+                    const color = getColor(id.toUpperCase());
+                    const statusText = color === 'red' ? 'CRITICAL' : (color === 'yellow' ? 'WARNING' : 'CLEAR');
+                    const el = document.getElementById(`card-${id}`);
+                    const badge = document.getElementById(`status-${id}`);
+                    
+                    // クラス適用
+                    el.classList.add(`status-${color}`);
+                    badge.innerText = statusText;
+                    
+                    // バッジの色調整
+                    if(color === 'red') badge.className = "mt-1 text-[9px] px-2 py-0.5 bg-red-600 text-white rounded font-bold";
+                    if(color === 'yellow') badge.className = "mt-1 text-[9px] px-2 py-0.5 bg-yellow-600 text-black rounded font-bold";
+                    if(color === 'green') badge.className = "mt-1 text-[9px] px-2 py-0.5 bg-green-600 text-white rounded font-bold";
+                });
+
+                // レポート表示（FLAGS行を除去）
+                document.getElementById('report-content').innerText = analysis.replace(flagLine, "").trim();
 
             } catch (e) {
                 console.error(e);
-                content.innerText = "通信エラー発生！\n" + e.message;
-                sysLog.innerText += "\n> SYSTEM ERROR DETECTED.";
-                updateStatus("nas", "RED");
+                log(`FATAL ERROR: ${e.message}`);
+                document.getElementById('report-content').innerText = "通信エラーが発生しました。時間を置いて再試行してください。\n" + e.message;
             } finally {
                 btn.disabled = false;
                 btnText.innerText = "RE-SCAN";
-                progress.style.width = "0";
-                setTimeout(() => sysLog.classList.add('hidden'), 5000);
+                setTimeout(() => { pBar.style.width = "0%"; }, 1000);
             }
         }
+
+        // 起動
+        window.onload = init;
     </script>
 </body>
 </html>
