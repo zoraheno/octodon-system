@@ -195,7 +195,7 @@
                 const flash = data.models.find(m => m.name.includes("2.5-flash")) || data.models.find(m => m.name.includes("2.0-flash"));
                 
                 // 優先順位: 2.5-pro-exp > 2.0-pro
-                const pro = data.models.find(m => m.name.includes("2.5-pro-exp")) || data.models.find(m => m.name.includes("2.0-pro")) || flash;
+                const pro = data.models.find(m => m.name.includes("3.0-pro")) || data.models.find(m => m.name.includes("2.5-pro")) || flash;
 
                 if(flash) SCOUT_MODEL = flash.name.replace("models/", "");
                 if(pro) COMMANDER_MODEL = pro.name.replace("models/", "");
