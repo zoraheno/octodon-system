@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,10 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&family=Black+Ops+One&display=swap');
-        
-        body { 
-            background-color: #050505; 
-            color: #e2e8f0; 
+
+        body {
+            background-color: #050505;
+            color: #e2e8f0;
             font-family: 'JetBrains Mono', monospace;
             height: 100vh;
             overflow: hidden;
@@ -21,50 +22,81 @@
             padding-bottom: max(20px, env(safe-area-inset-bottom));
         }
 
-        .cyber-font { font-family: 'Black Ops One', cursive; letter-spacing: 0.1em; }
-        
+        .cyber-font {
+            font-family: 'Black Ops One', cursive;
+            letter-spacing: 0.1em;
+        }
+
         /* ステータスカード */
-        .status-box { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #1e293b; }
-        
+        .status-box {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #1e293b;
+        }
+
         /* 状態別スタイル */
-        .status-red { 
-            background: linear-gradient(135deg, rgba(69,10,10,0.8) 0%, rgba(0,0,0,0.9) 100%);
-            border-color: #ef4444; 
+        .status-red {
+            background: linear-gradient(135deg, rgba(69, 10, 10, 0.8) 0%, rgba(0, 0, 0, 0.9) 100%);
+            border-color: #ef4444;
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
             animation: pulse-red 2s infinite;
         }
-        .status-yellow { 
-            background: linear-gradient(135deg, rgba(66,32,6,0.8) 0%, rgba(0,0,0,0.9) 100%);
-            border-color: #eab308; 
+
+        .status-yellow {
+            background: linear-gradient(135deg, rgba(66, 32, 6, 0.8) 0%, rgba(0, 0, 0, 0.9) 100%);
+            border-color: #eab308;
             box-shadow: 0 0 15px rgba(234, 179, 8, 0.3);
         }
-        .status-green { 
-            background: linear-gradient(135deg, rgba(20,83,45,0.8) 0%, rgba(0,0,0,0.9) 100%);
-            border-color: #22c55e; 
+
+        .status-green {
+            background: linear-gradient(135deg, rgba(20, 83, 45, 0.8) 0%, rgba(0, 0, 0, 0.9) 100%);
+            border-color: #22c55e;
             box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
         }
 
         @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
         }
 
         /* UIパーツ */
         .scan-btn {
             background: linear-gradient(90deg, #4f46e5 0%, #3730a3 100%);
-            position: relative; overflow: hidden;
+            position: relative;
+            overflow: hidden;
         }
-        .scan-btn:active { transform: scale(0.98); }
+
+        .scan-btn:active {
+            transform: scale(0.98);
+        }
+
         .scan-btn::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: 0.5s;
         }
-        .scan-btn:hover::after { left: 100%; }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        
+        .scan-btn:hover::after {
+            left: 100%;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
         /* ターミナル風出力エリア */
         .terminal-window {
             background-color: #0f172a;
@@ -74,75 +106,126 @@
         }
     </style>
 </head>
-<body class="space-y-3"> 
+
+<body class="space-y-3">
     <header class="flex justify-between items-end pb-2 border-b border-slate-800">
         <div>
             <div class="flex items-center gap-2 mb-1">
-                <span onclick="resetApiKey()" class="text-[10px] text-slate-600 hover:text-red-500 cursor-pointer font-bold tracking-widest">[RESET KEY]</span>
-                <span id="model-badge" class="text-[9px] bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded text-slate-500">SYSTEM OFFLINE</span>
-                
-                <button onclick="copyEmergencyScript()" class="text-[9px] bg-red-950 border border-red-700 text-red-400 hover:bg-red-900 hover:text-white px-2 py-0.5 rounded transition-colors font-bold tracking-widest flex items-center gap-1 shadow-[0_0_5px_rgba(220,38,38,0.5)]">
+                <span onclick="resetApiKey()"
+                    class="text-[10px] text-slate-600 hover:text-red-500 cursor-pointer font-bold tracking-widest">[RESET
+                    KEY]</span>
+                <span id="model-badge"
+                    class="text-[9px] bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded text-slate-500">SYSTEM
+                    OFFLINE</span>
+
+                <button onclick="copyEmergencyScript()"
+                    class="text-[9px] bg-red-950 border border-red-700 text-red-400 hover:bg-red-900 hover:text-white px-2 py-0.5 rounded transition-colors font-bold tracking-widest flex items-center gap-1 shadow-[0_0_5px_rgba(220,38,38,0.5)]">
                     🆘 EMERGENCY COPY
                 </button>
             </div>
-            <h1 class="text-2xl cyber-font text-white leading-none tracking-tighter">OCTODON <span class="text-indigo-500">SYS.16.1</span></h1> 
+            <h1 class="text-2xl cyber-font text-white leading-none tracking-tighter">OCTODON <span
+                    class="text-indigo-500">SYS.16.1</span></h1>
         </div>
         <div class="text-right">
             <div class="text-[9px] text-slate-500">JST (TOKYO)</div>
-            <div id="clock" class="text-xl font-bold text-slate-400 cyber-font">00:00:00</div> 
+            <div id="clock" class="text-xl font-bold text-slate-400 cyber-font">00:00:00</div>
         </div>
     </header>
-
-    <div class="grid grid-cols-2 gap-2 h-32 md:h-40">
-        <div id="card-macro" class="status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative">
-            <div class="absolute top-1 left-2 text-[8px] text-slate-500 tracking-widest">SECTOR A</div>
-            <button onclick="deepDiveSector('macro')" id="btn-deepdive-macro" class="hidden absolute top-1 right-1 text-xs bg-slate-800 text-indigo-400 border border-indigo-500/50 hover:bg-indigo-500 hover:text-white rounded w-6 h-6 flex items-center justify-center transition-colors shadow-[0_0_5px_rgba(99,102,241,0.5)] z-10" title="COMMANDER DEEP DIVE">🔍</button>
-            <div class="text-xl mb-1 flex gap-2">🦅 ⚖️</div>
-            <div class="text-xs font-bold text-slate-300 text-center leading-tight">MACRO<br><span class="text-[9px] text-slate-500">NAS / METAL</span></div>
-            <div id="status-macro" class="mt-1 text-[9px] px-2 py-0.5 bg-slate-950 rounded text-slate-600">WAITING</div> 
+    <div class="mt-3 relative group">
+        <div
+            class="absolute -top-[1px] -left-[1px] w-3 h-3 border-t border-l border-indigo-600 opacity-50 group-hover:opacity-100 transition-opacity">
         </div>
-        
-        <div id="card-deepsea" class="status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative">
-            <div class="absolute top-1 left-2 text-[8px] text-slate-500 tracking-widest">SECTOR B</div>
-            <button onclick="deepDiveSector('deepsea')" id="btn-deepdive-deepsea" class="hidden absolute top-1 right-1 text-xs bg-slate-800 text-indigo-400 border border-indigo-500/50 hover:bg-indigo-500 hover:text-white rounded w-6 h-6 flex items-center justify-center transition-colors shadow-[0_0_5px_rgba(99,102,241,0.5)] z-10" title="COMMANDER DEEP DIVE">🔍</button>
-            <div class="text-xl mb-1 flex gap-2">⚓ 💎</div>
-            <div class="text-xs font-bold text-slate-300 text-center leading-tight">DEEP SEA<br><span class="text-[9px] text-slate-500">JP / US</span></div>
-            <div id="status-deepsea" class="mt-1 text-[9px] px-2 py-0.5 bg-slate-950 rounded text-slate-600">WAITING</div>
+        <div
+            class="absolute -top-[1px] -right-[1px] w-3 h-3 border-t border-r border-indigo-600 opacity-50 group-hover:opacity-100 transition-opacity">
+        </div>
+        <div
+            class="absolute -bottom-[1px] -left-[1px] w-3 h-3 border-b border-l border-indigo-600 opacity-50 group-hover:opacity-100 transition-opacity">
+        </div>
+        <div
+            class="absolute -bottom-[1px] -right-[1px] w-3 h-3 border-b border-r border-indigo-600 opacity-50 group-hover:opacity-100 transition-opacity">
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-700/50 p-2 backdrop-blur-sm relative overflow-hidden">
+            <div class="flex justify-between items-center mb-1 px-1">
+                <label for="targetTickers"
+                    class="text-[10px] text-indigo-400 font-bold tracking-widest flex items-center gap-2">
+                    Ï <span class="inline-block w-1.5 h-1.5 bg-indigo-500 animate-pulse rounded-full"></span>
+                    TARGET DESIGNATION [SCOPE: GLOBAL]
+                </label>
+                <span id="saveStatus" class="text-[9px] text-slate-600 font-mono tracking-tight">READY</span>
+            </div>
+
+            <textarea id="targetTickers"
+                class="w-full bg-slate-950 text-slate-300 text-xs font-mono border border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 focus:bg-slate-900 rounded-sm p-2 outline-none transition-all resize-y placeholder-slate-700 leading-relaxed shadow-inner"
+                rows="2" placeholder="ENTER TICKERS // EX: 7203, 9984, GOOGL, NVDA, USDJPY..."></textarea>
+
+            <div
+                class="absolute top-0 left-0 w-full h-full pointer-events-none bg-[linear-gradient(rgba(18,16,255,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 bg-[length:100%_2px,3px_100%] opacity-20">
+            </div>
         </div>
     </div>
-    <button onclick="executeMission()" id="scan-btn" class="scan-btn w-full py-4 text-white font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 transition-all group">
+    <div class="grid grid-cols-2 gap-2 h-32 md:h-40">
+        <div id="card-macro"
+            class="status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative">
+            <div class="absolute top-1 left-2 text-[8px] text-slate-500 tracking-widest">SECTOR A</div>
+            <button onclick="deepDiveSector('macro')" id="btn-deepdive-macro"
+                class="hidden absolute top-1 right-1 text-xs bg-slate-800 text-indigo-400 border border-indigo-500/50 hover:bg-indigo-500 hover:text-white rounded w-6 h-6 flex items-center justify-center transition-colors shadow-[0_0_5px_rgba(99,102,241,0.5)] z-10"
+                title="COMMANDER DEEP DIVE">🔍</button>
+            <div class="text-xl mb-1 flex gap-2">🦅 ⚖️</div>
+            <div class="text-xs font-bold text-slate-300 text-center leading-tight">MACRO<br><span
+                    class="text-[9px] text-slate-500">NAS / METAL</span></div>
+            <div id="status-macro" class="mt-1 text-[9px] px-2 py-0.5 bg-slate-950 rounded text-slate-600">WAITING</div>
+        </div>
+
+        <div id="card-deepsea"
+            class="status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative">
+            <div class="absolute top-1 left-2 text-[8px] text-slate-500 tracking-widest">SECTOR B</div>
+            <button onclick="deepDiveSector('deepsea')" id="btn-deepdive-deepsea"
+                class="hidden absolute top-1 right-1 text-xs bg-slate-800 text-indigo-400 border border-indigo-500/50 hover:bg-indigo-500 hover:text-white rounded w-6 h-6 flex items-center justify-center transition-colors shadow-[0_0_5px_rgba(99,102,241,0.5)] z-10"
+                title="COMMANDER DEEP DIVE">🔍</button>
+            <div class="text-xl mb-1 flex gap-2">⚓ 💎</div>
+            <div class="text-xs font-bold text-slate-300 text-center leading-tight">DEEP SEA<br><span
+                    class="text-[9px] text-slate-500">JP / US</span></div>
+            <div id="status-deepsea" class="mt-1 text-[9px] px-2 py-0.5 bg-slate-950 rounded text-slate-600">WAITING
+            </div>
+        </div>
+    </div>
+    <button onclick="executeMission()" id="scan-btn"
+        class="scan-btn w-full py-4 text-white font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 transition-all group">
         <span class="text-xl group-hover:rotate-90 transition-transform duration-500">✜</span>
-        <span id="btn-text" class="text-sm tracking-[0.2em] font-bold">INITIATE SCAN</span> 
+        <span id="btn-text" class="text-sm tracking-[0.2em] font-bold">INITIATE SCAN</span>
         <div id="progress-bar" class="absolute bottom-0 left-0 h-1 bg-cyan-400 w-0 transition-all duration-300"></div>
     </button>
     <div class="flex-grow overflow-hidden flex flex-col mt-3">
         <div class="terminal-window rounded-lg flex-grow flex flex-col overflow-hidden relative">
-            <button onclick="downloadReport()" id="download-btn" class="hidden absolute top-2 right-2 z-10 text-[9px] bg-slate-800 text-cyan-400 px-2 py-1 rounded border border-cyan-700 hover:bg-cyan-900 hover:text-white transition-colors flex items-center gap-1">
+            <button onclick="downloadReport()" id="download-btn"
+                class="hidden absolute top-2 right-2 z-10 text-[9px] bg-slate-800 text-cyan-400 px-2 py-1 rounded border border-cyan-700 hover:bg-cyan-900 hover:text-white transition-colors flex items-center gap-1">
                 <span>⬇</span> DOWNLOAD .MD
             </button>
 
-            <div id="system-log" class="p-2 border-b border-slate-700 bg-slate-950 text-[10px] text-green-500 font-mono h-24 overflow-y-auto">
+            <div id="system-log"
+                class="p-2 border-b border-slate-700 bg-slate-950 text-[10px] text-green-500 font-mono h-24 overflow-y-auto">
                 > SYSTEM READY.<br>
                 > AWAITING COMMAND...<br>
             </div>
-            
-            <div class="flex-grow overflow-y-auto p-3 text-xs leading-relaxed text-slate-300 whitespace-pre-wrap font-mono no-scrollbar" id="report-content">
-(ここに戦況報告がセクターごとに逐次表示されます)
+
+            <div class="flex-grow overflow-y-auto p-3 text-xs leading-relaxed text-slate-300 whitespace-pre-wrap font-mono no-scrollbar"
+                id="report-content">
+                (ここに戦況報告がセクターごとに逐次表示されます)
             </div>
         </div>
     </div>
     <script>
+        // --- 💾 自動保存・読み込みシステム ---
+        const targetInput = document.getElementById('targetTickers');
+        const saveStatus = document.getElementById('saveStatus');
         // --- 設定変数 ---
         let apiKey = localStorage.getItem("octdon_api_key");
-        
-        let SCOUT_MODEL = "gemini-2.5-flash"; 
-        let COMMANDER_MODEL = "gemini-3-flash-preview"; 
+        let SCOUT_MODEL = "gemini-2.5-flash";
+        let COMMANDER_MODEL = "gemini-3-flash-preview";
         const sectorDataStore = {};
         const TARGET_MACRO = "US Stock Index Futures (NQ, ES), Nikkei 225 Futures (OSE, SGX, CME), Nikkei 225 Mini, Gold/Oil Futures, VIX Index, Options Implied Volatility, Put/Call Ratio,USD/JPY Exchange Rate";
-        const TARGET_DEEP_SEA = "JP: JMDC(4483) INPEX(1605) JX金属(5016) PTS株価 空売り残高, US: GOOGL IonQ Pre-market After-hours price, Options Implied Volatility";
-
-        
-
+     
         // --- 初期化処理 ---
         async function init() {
             updateClock();
@@ -170,15 +253,47 @@
         }
 
         function resetApiKey() {
-            if(confirm("認証情報を破棄しますか？")) {
+            if (confirm("認証情報を破棄しますか？")) {
                 localStorage.removeItem("octdon_api_key");
                 location.reload();
             }
         }
+        // ページ読み込み時にデータを復元
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTargets = localStorage.getItem("octodon_targets");
+            if (savedTargets) {
+                targetInput.value = savedTargets;
+                saveStatus.textContent = "DATA RESTORED";
+                saveStatus.className = "text-[9px] text-green-500/70 font-mono tracking-tight";
 
+                // 3秒後に表示を戻す
+                setTimeout(() => {
+                    saveStatus.textContent = "MONITORING ACTIVE";
+                    saveStatus.className = "text-[9px] text-indigo-400/70 font-mono tracking-tight";
+                }, 3000);
+            } else {
+                // 初期データがない場合のデフォルト（深海用）
+            }
+        });
+
+        // 入力するたびに自動保存（オートセーブ）
+        targetInput.addEventListener('input', () => {
+            localStorage.setItem("octodon_targets", targetInput.value);
+
+            // 保存中エフェクト
+            saveStatus.textContent = "SAVING...";
+            saveStatus.className = "text-[9px] text-yellow-500/70 font-mono tracking-tight";
+
+            // 入力が止まったら完了表示
+            clearTimeout(window.saveTimer);
+            window.saveTimer = setTimeout(() => {
+                saveStatus.textContent = "SAVED";
+                saveStatus.className = "text-[9px] text-green-500/70 font-mono tracking-tight";
+            }, 500);
+        });
         function downloadReport() {
             const content = document.getElementById('report-content').innerText;
-            if(!content || content.includes("(ここに戦況報告")) return alert("保存するデータがありません。");
+            if (!content || content.includes("(ここに戦況報告")) return alert("保存するデータがありません。");
             const now = new Date();
             const dateStr = now.toISOString().slice(0, 10);
             const timeStr = now.toTimeString().slice(0, 5).replace(':', '-');
@@ -197,24 +312,34 @@
         function copyEmergencyScript() {
             const now = new Date();
             const prevDate = new Date(now);
-            prevDate.setDate(prevDate.getDate() - 2); 
+            prevDate.setDate(prevDate.getDate() - 2);
             const dateStr = prevDate.toISOString().split('T')[0];
+            const deepSeaData = document.getElementById('targetTickers').value;
+            // もし空っぽだったら、デフォルト値を入れる安全装置
+            if (!deepSeaData) {
+                alert("司令官！ターゲットが指定されていません！");
+                return;
+            }
 
             // AIにそのまま投げるための超強力なプロンプト（命令文）デグ！
-            const promptText = `以下の情報を収集し、戦況報告を行ってください。
+            const promptText = `以下の2ステップで、冷徹な市場分析を行ってください。
 
-【検索期間】: after:${dateStr} (最新の数値を確実に拾うこと)
+### STEP 1: 【事実の収集】 (Search Only)
+※ここでは分析や判断をせず、以下の最新データ（数値・事実）のみを検索・抽出してください。検索期間: after:${dateStr} 
 
-【監視対象】
-1. MACRO: ${TARGET_MACRO} latest price news (Open High Low Close)
-2. DEEP SEA (深海監視): ${TARGET_DEEP_SEA} latest price news (Open High Low Close)
+1. MACRO: 
+ ${TARGET_MACRO} latest price news (Open High Low Close)
+2. DEEP SEA (深海監視): 
+ ${deepSeaData} latest price news (Open High Low Close)
+  * US必須データ: Pre-market/After-hours Price, Options IV Skew.
+  * JP必須データ： PTS株価 空売り残高 CME/OSE比率（裁定取引の歪み）、NT倍率の急変、引け間際（大引け）の急激な出来高増、信用買い残の回転日数と損益率、貸借倍率の急化
 
 【分析の重要指令】
 収集したデータをもとに、以下の4点を特に厳しく判定してください：
-1. 「行って来い（実体が小さくヒゲが長い）」による攻勢失敗の兆候はあるか？（反落警戒🔄）
-2. 価格が急落し、「深海指値（パニック売り時の大底）」のラインに到達しつつある絶好の待機銘柄はあるか？（補給チャンス💎）
-3. 時間外取引（PTS/Pre-market）の急落や、オプションIV・空売り残高の異常値があるか？（危険察知🔥）
-4. 重要イベント（決算、配当日、SQ、春節など）や事件、事故、災害などによる利益確定、退避の動きがないか？
+1. アルゴのスイッチ察知: 単なる価格変動ではなく、**「一定の価格帯で不自然にリピートされる売買（アルゴの発動）」や、「節目（Round Number）直前での不自然な押し戻し」**はないか？（反落警戒🔄）
+2.「大口の退避」と「個人の投げ」の峻別: 急落時、「超大口の売り」が先行しているのか（危険察知🔥）、それとも「個人の追証回避」によるパニック（補給チャンス💎）なのかを、出来高と板の薄さから判定せよ。
+3. 裁定解消・SQ需給の歪み: 現物と先物の乖離、またはオプションの建玉が集中する価格帯（ピンニング）に向けて無理やり引き寄せられる動き（マグネット効果）はないか？（反落警戒🔄）
+4. 「騙し」の判別: 強気な時間外取引（PTS）に対して、翌朝の気配値が「窓開け」後に即座に窓を埋める「寄り天」のアルゴが発動しそうか？（危険察知🔥）
 
 【出力の絶対ルール】
 ・挨拶不要。必ず日本語で、事実と数値を極めて端的に記述せよ。
@@ -250,21 +375,21 @@ SECTORごとの総括とアクションプラン
                 const res = await fetch(url);
                 if (!res.ok) throw new Error("Connection Failed");
                 const data = await res.json();
-                
+
                 // 3-flashを最優先、なければ2.5-flash
                 const flash = data.models.find(m => m.name.includes("gemini-2.5-flash")) || data.models.find(m => m.name.includes("2.5-flash"));
-                
+
                 // 今回はProの代わりに、COMMANDERにも賢い3-flashを割り当てるデグ！
                 const pro = data.models.find(m => m.name.includes("gemini-3-flash-preview")) || flash;
 
-                if(flash) SCOUT_MODEL = flash.name.replace("models/", "");
-                if(pro) COMMANDER_MODEL = pro.name.replace("models/", "");
-                
+                if (flash) SCOUT_MODEL = flash.name.replace("models/", "");
+                if (pro) COMMANDER_MODEL = pro.name.replace("models/", "");
+
                 badge.innerText = `LINKED: SCOUT & COMMANDER (v3)`;
                 badge.className = "text-[9px] bg-indigo-900 border border-indigo-500 px-1.5 py-0.5 rounded text-indigo-300";
                 log(`SCOUT UNIT: ${SCOUT_MODEL}`);
                 log(`COMMANDER: ${COMMANDER_MODEL}`);
-            } catch(e) {
+            } catch (e) {
                 badge.innerText = "AUTH ERROR";
                 badge.className = "text-[9px] bg-red-900 border border-red-500 px-1.5 py-0.5 rounded text-red-300";
                 log(`ERROR: ${e.message}`);
@@ -276,9 +401,9 @@ SECTORごとの総括とアクションプラン
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             const payload = { contents: [{ parts: [{ text: text }] }] };
             if (useSearch) payload.tools = [{ google_search: {} }];
-            
+
             const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            
+
             if (!res.ok) {
                 if (res.status === 429 && retryCount < 2) {
                     log(`⚠️ API 429 LIMIT HIT. COOLING DOWN (5s)...`);
@@ -308,44 +433,50 @@ SECTORごとの総括とアクションプラン
             const pBar = document.getElementById('progress-bar');
             const reportContent = document.getElementById('report-content');
             const dlBtn = document.getElementById('download-btn');
-            
-            if(!apiKey) return alert("API Key not set");
+
+            if (!apiKey) return alert("API Key not set");
 
             btn.disabled = true;
             dlBtn.classList.add('hidden');
-            reportContent.innerHTML = ""; 
-            
+            reportContent.innerHTML = "";
+
             // UIリセット（4つから2つに変更）
-            document.querySelectorAll('.status-box').forEach(el => el.className = 'status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative'); 
+            document.querySelectorAll('.status-box').forEach(el => el.className = 'status-box bg-slate-900 rounded-lg flex flex-col items-center justify-center relative');
             ['macro', 'deepsea'].forEach(id => {
                 document.getElementById(`status-${id}`).innerText = "WAITING...";
                 document.getElementById(`btn-deepdive-${id}`).classList.add('hidden');
                 document.getElementById(`btn-deepdive-${id}`).innerHTML = "🔍";
                 document.getElementById(`btn-deepdive-${id}`).classList.remove('animate-spin');
             });
-            
+
             try {
                 const now = new Date();
                 const prevDate = new Date(now);
-                prevDate.setDate(prevDate.getDate() - 2); 
+                prevDate.setDate(prevDate.getDate() - 2);
                 const afterStr = `after:${prevDate.toISOString().split('T')[0]}`;
+                const deepSeaData = document.getElementById('targetTickers').value;
+                // もし空っぽだったら、デフォルト値を入れる安全装置
+                if (!deepSeaData) {
+                    alert("司令官！ターゲットが指定されていません！");
+                    return;
+                }
 
                 // ★NEW: スキャン対象を2つに統合！これでAPIの消費が1回のスキャンで2RPMになるデグ！
                 const queries = [
-                    { 
-                        id: "macro", 
-                        title: "MACRO ANALYSIS", 
-                        q: `${TARGET_MACRO} latest price news (Open High Low Close) ${afterStr}` 
+                    {
+                        id: "macro",
+                        title: "MACRO ANALYSIS",
+                        q: `${TARGET_MACRO} latest price news (Open High Low Close) ${afterStr} JP: 日経平均オプション 25円・50円刻みの権利行使価格別 建玉推移、CME/OSE比率（裁定取引の歪み）、NT倍率の急変`
                     },
-                    { 
-                        id: "deepsea", 
-                        title: "DEEP SEA FORCE ", 
-                        q: `${TARGET_DEEP_SEA} stock latest price news (Open High Low Close) ${afterStr}` 
+                    {
+                        id: "deepsea",
+                        title: "DEEP SEA FORCE ",
+                        q: `${deepSeaData} stock latest price news (Open High Low Close) ${afterStr}`
                     }
                 ];
 
                 btnText.innerText = "SCANNING SECTORS...";
-                
+
                 for (let i = 0; i < queries.length; i++) {
                     const s = queries[i];
                     log(`>> DEPLOYING SCOUT TO SECTOR: ${s.id.toUpperCase()}...`);
@@ -391,19 +522,19 @@ SECTORごとの総括とアクションプラン
                         </div>
                     `;
                     reportContent.innerHTML += sectorHtml;
-                    reportContent.scrollTop = reportContent.scrollHeight; 
+                    reportContent.scrollTop = reportContent.scrollHeight;
 
                     document.getElementById(`card-${s.id}`).classList.remove('status-yellow');
                     document.getElementById(`card-${s.id}`).classList.add('status-green');
                     document.getElementById(`status-${s.id}`).innerText = "CLEAR";
                     document.getElementById(`status-${s.id}`).className = "mt-1 text-[9px] px-2 py-0.5 bg-green-600 text-white rounded font-bold";
-                    
+
                     document.getElementById(`btn-deepdive-${s.id}`).classList.remove('hidden');
 
-                    pBar.style.width = `${((i+1) / queries.length) * 100}%`;
-                    
+                    pBar.style.width = `${((i + 1) / queries.length) * 100}%`;
+
                     // 待機時間は4秒のままでOKデグ！
-                    await new Promise(r => setTimeout(r, 4000)); 
+                    await new Promise(r => setTimeout(r, 4000));
                 }
 
                 btnText.innerText = "MISSION COMPLETE";
@@ -423,11 +554,11 @@ SECTORごとの総括とアクションプラン
         async function deepDiveSector(sectorId) {
             const btn = document.getElementById(`btn-deepdive-${sectorId}`);
             const outArea = document.getElementById(`commander-report-${sectorId}`);
-            
+
             btn.disabled = true;
             btn.innerHTML = `⚙️`;
             btn.classList.add('animate-spin');
-            
+
             outArea.classList.remove('hidden');
             outArea.innerHTML = "Commander is analyzing tactical data...";
             log(`>> COMMANDER DEEP DIVE: ${sectorId.toUpperCase()}...`);
@@ -438,10 +569,10 @@ SECTORごとの総括とアクションプラン
 
 【分析の重要指令】
 収集したデータをもとに、以下の4点を特に厳しく判定してください：
-1. 「行って来い（実体が小さくヒゲが長い）」による攻勢失敗の兆候はあるか？（反落警戒🔄）
-2. 価格が急落し、「深海指値（パニック売り時の大底）」のラインに到達しつつある絶好の待機銘柄はあるか？（補給チャンス💎）
-3. 時間外取引（PTS/Pre-market）の急落や、オプションIV・空売り残高の異常値があるか？（危険察知🔥）
-4. 重要イベント（決算、SQ、春節など）による利益確定、退避の動きがないか？
+1. アルゴのスイッチ察知: 単なる価格変動ではなく、**「一定の価格帯で不自然にリピートされる売買（アルゴの発動）」や、「節目（Round Number）直前での不自然な押し戻し」**はないか？（反落警戒🔄）
+2.「大口の退避」と「個人の投げ」の峻別: 急落時、「超大口の売り」が先行しているのか（危険察知🔥）、それとも「個人の追証回避」によるパニック（補給チャンス💎）なのかを、出来高と板の薄さから判定せよ。
+3. 裁定解消・SQ需給の歪み: 現物と先物の乖離、またはオプションの建玉が集中する価格帯（ピンニング）に向けて無理やり引き寄せられる動き（マグネット効果）はないか？（反落警戒🔄）
+4. 「騙し」の判別: 強気な時間外取引（PTS）に対して、翌朝の気配値が「窓開け」後に即座に窓を埋める「寄り天」のアルゴが発動しそうか？（危険察知🔥）
 
 【出力の絶対ルール】
 ・AIとしての挨拶、前置き、自己紹介などは一切禁止。
@@ -461,13 +592,13 @@ ${rawData}
             try {
                 const analysis = await callGeminiSafe(COMMANDER_MODEL, SCOUT_MODEL, commanderPrompt, false);
                 outArea.innerHTML = analysis.replace(/\n/g, '<br>');
-                
+
                 btn.classList.remove('animate-spin');
                 btn.innerHTML = `✅`;
                 btn.classList.replace('text-indigo-400', 'text-green-400');
-                
+
                 log(`>> ANALYSIS COMPLETE FOR ${sectorId.toUpperCase()}.`);
-            } catch(e) {
+            } catch (e) {
                 outArea.innerHTML = `<span class="text-red-500">ANALYSIS FAILED: ${e.message}</span>`;
                 btn.classList.remove('animate-spin');
                 btn.innerHTML = `⚠️`;
